@@ -86,3 +86,7 @@ OCABOT_TWINE_REPOSITORIES="[('https://pypi.org/simple','https://upload.pypi.org/
 # List of branches the bot will check to verify if user is the maintainer
 # of module(s)
 MAINTAINER_CHECK_ODOO_RELEASES=8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0
+
+# Version of newly created repository
+# NEW_REPO_VERSION=16.0
+# NEW_REPO_TEMPLATE=https://github.com/OCA/oca-addons-repo-template

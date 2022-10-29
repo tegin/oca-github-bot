@@ -4,7 +4,13 @@
 import re
 
 from . import config
-from .tasks import add_psc_member_bot, merge_bot, migration_issue_bot, rebase_bot
+from .tasks import (
+    add_psc_member_bot,
+    merge_bot,
+    migration_issue_bot,
+    new_repo,
+    rebase_bot,
+)
 
 BOT_COMMAND_RE = re.compile(
     # Do not start with > (Github comment), not consuming it
@@ -68,6 +74,8 @@ class BotCommand:
             raise InvalidCommandError(name)
         elif name == "add_psc" and repo == config.GITHUB_PSC_REPO:
             return BotCommandAddPSC(name, options)
+        elif name == "new_repo" and repo == config.GITHUB_PSC_REPO:
+            return BotCommandNewRepo(name, options)
         return None
 
     def parse_options(self, options):
@@ -120,6 +128,23 @@ class BotCommandAddPSC(BotCommand):
     def delay(self, org, repo, pr, username, dry_run=False):
         add_psc_member_bot.add_psc_member.delay(
             org, repo, pr, username, team=self.team, dry_run=dry_run
+        )
+
+
+class BotCommandNewRepo(BotCommand):
+    repo_name = None
+    team = None  # mandatory str: team name
+
+    def parse_options(self, options):
+        if len(options) == 2:
+            self.repo_name = options[0]
+            self.team = options[1]
+        else:
+            raise InvalidOptionsError(self.name, options)
+
+    def delay(self, org, repo, pr, username, dry_run=False):
+        new_repo.new_repo.delay(
+            org, repo, pr, username, self.repo_name, self.team, dry_run=dry_run
         )
 
 

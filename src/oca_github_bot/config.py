@@ -87,6 +87,10 @@ GITHUB_STATUS_IGNORED = os.environ.get(
     "GITHUB_STATUS_IGNORED",
     "ci/runbot,codecov/project,codecov/patch,coverage/coveralls",
 ).split(",")
+NEW_REPO_VERSION = os.environ.get("NEW_REPO_VERSION", "16.0")
+NEW_REPO_TEMPLATE = os.environ.get(
+    "NEW_REPO_TEMPLATE", "https://github.com/OCA/oca-addons-repo-template"
+)
 
 GITHUB_CHECK_SUITES_IGNORED = os.environ.get(
     "GITHUB_CHECK_SUITES_IGNORED", "Codecov,Dependabot"
