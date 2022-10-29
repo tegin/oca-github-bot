@@ -3,7 +3,8 @@
 
 import re
 
-from .tasks import merge_bot, migration_issue_bot, rebase_bot
+from . import config
+from .tasks import add_psc_member_bot, merge_bot, migration_issue_bot, rebase_bot
 
 BOT_COMMAND_RE = re.compile(
     # Do not start with > (Github comment), not consuming it
@@ -56,15 +57,18 @@ class BotCommand:
         self.parse_options(options)
 
     @classmethod
-    def create(cls, name, options):
-        if name == "merge":
+    def create(cls, name, options, repo, is_pull_request):
+        if name == "merge" and is_pull_request:
             return BotCommandMerge(name, options)
-        elif name == "rebase":
+        elif name == "rebase" and is_pull_request:
             return BotCommandRebase(name, options)
-        elif name == "migration":
+        elif name == "migration" and is_pull_request:
             return BotCommandMigrationIssue(name, options)
-        else:
+        elif is_pull_request:
             raise InvalidCommandError(name)
+        elif name == "add_psc" and repo == config.GITHUB_PSC_REPO:
+            return BotCommandAddPSC(name, options)
+        return None
 
     def parse_options(self, options):
         pass
@@ -104,6 +108,21 @@ class BotCommandRebase(BotCommand):
         rebase_bot.rebase_bot_start.delay(org, repo, pr, username, dry_run=False)
 
 
+class BotCommandAddPSC(BotCommand):
+    team = None  # mandatory str: team name
+
+    def parse_options(self, options):
+        if len(options) == 1:
+            self.team = options[0]
+        else:
+            raise InvalidOptionsError(self.name, options)
+
+    def delay(self, org, repo, pr, username, dry_run=False):
+        add_psc_member_bot.add_psc_member.delay(
+            org, repo, pr, username, team=self.team, dry_run=dry_run
+        )
+
+
 class BotCommandMigrationIssue(BotCommand):
     module = None  # mandatory str: module name
 
@@ -119,9 +138,14 @@ class BotCommandMigrationIssue(BotCommand):
         )
 
 
-def parse_commands(text):
+def parse_commands(text, repo, is_pull_request):
     """Parse a text and return an iterator of BotCommand objects."""
     for mo in BOT_COMMAND_RE.finditer(text):
-        yield BotCommand.create(
-            mo.group("command"), mo.group("options").strip().split()
+        command = BotCommand.create(
+            mo.group("command"),
+            mo.group("options").strip().split(),
+            repo,
+            is_pull_request,
         )
+        if command is not None:
+            yield command

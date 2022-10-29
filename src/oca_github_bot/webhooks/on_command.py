@@ -10,19 +10,17 @@ from ..tasks.add_pr_comment import add_pr_comment
 @router.register("issue_comment", action="created")
 async def on_command(event, gh, *args, **kwargs):
     """On pull request review, tag if approved or ready to merge."""
-    if not event.data["issue"].get("pull_request"):
-        # ignore issue comments
-        return
+    is_pull_request = event.data["issue"].get("pull_request")
     org, repo = event.data["repository"]["full_name"].split("/")
     pr = event.data["issue"]["number"]
     username = event.data["comment"]["user"]["login"]
     text = event.data["comment"]["body"]
-    await _on_command(org, repo, pr, username, text)
+    await _on_command(org, repo, pr, username, text, is_pull_request)
 
 
-async def _on_command(org, repo, pr, username, text):
+async def _on_command(org, repo, pr, username, text, is_pull_request):
     try:
-        for command in parse_commands(text):
+        for command in parse_commands(text, repo, is_pull_request):
             command.delay(org, repo, pr, username)
     except CommandError as e:
         # Add a comment on the current PR, if

@@ -37,6 +37,7 @@ HTTP_PORT = int(os.environ.get("HTTP_PORT") or "8080")
 GITHUB_SECRET = os.environ.get("GITHUB_SECRET")
 GITHUB_LOGIN = os.environ.get("GITHUB_LOGIN")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+GITHUB_PSC_REPO = os.environ.get("GITHUB_PSC_REPO")
 GITHUB_ORG = (
     os.environ.get("GITHUB_ORG") and os.environ.get("GITHUB_ORG").split(",") or []
 )

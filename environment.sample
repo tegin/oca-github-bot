@@ -17,6 +17,8 @@ GITHUB_LOGIN=
 GITHUB_TOKEN=
 # Coma separated list of github organisations names (for organization wide scheduled tasks)
 #GITHUB_ORG=
+# Repo name used to manage PSC calls
+GITHUB_PSC_REPO=
 # Git name and email used for creating commits (default: user git config,
 # needs to be set to to launch the docker composition)
 GIT_NAME=
